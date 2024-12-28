@@ -1,6 +1,7 @@
 # RedmineDocs
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/amats6655/RedmineDocs) ![GitHub issues](https://img.shields.io/github/issues/amats6655/RedmineDocs)
+
 `RedmineDocs` — это приложение для генерации документации из базы данных Redmine. Оно предоставляет возможность автоматического создания страниц в формате Markdown и HTML на основе данных о проектах, ролях, кнопках, трекерах и группах.
 
 ## Функциональность
