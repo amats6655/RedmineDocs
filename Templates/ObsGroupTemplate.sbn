@@ -1,0 +1,20 @@
+---
+cssclasses:
+  - wide-page
+tags:
+  - Группа
+title: {{ group.Description }}
+date: 2024-11-25
+draft: false
+---
+
+## 📝 Обзор
+
+{{ group.Description }}
+
+---
+## 📚 Связанные проекты и роли
+
+| *Проект*                | *Роли в проекте*                  |
+|-------------------------|-----------------------------------|{{ for project in group.Projects }}
+| [[Проект {{ project.Name }}]] |   {{ for role in project.Roles }}    [[Роль {{ role.Name }}]]{{ if !for.last }}, {{ end }}  {{ end }} |{{ end }}

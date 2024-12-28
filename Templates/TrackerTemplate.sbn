@@ -1,0 +1,28 @@
+h1. Трекер: {{ tracker.Name }}
+{toc:printable=true|maxLevel=2|minLevel=2|class=bigpink|exclude=[1//2]|type=flat|separator=pipe|include=.*}
+
+h2. Обзор
+
+{{ tracker.Description }}
+
+h2. Используемые в проектах
+
+| *ID проекта* | *Название проекта* | *Описание*                 |
+||||{{ for project in tracker.Projects }}
+| {{ project.Id }} | {{ project.Name }} | {{ project.Description }} |{{ end }}
+
+h2. Роли и функционал
+
+| *Роль*               | *Функционал*                      |
+|||{{ for role in tracker.Roles }}
+| {{ role.Name }}    |   {{ 
+    for permission in role.PermissionsAllTrackers
+        if permission.Value == 1 && permission.Key != "delete_issues"
+            "* " + permission.Key + "\n "
+        end
+    end
+    for permission in role.PermissionsTrackerIds
+        if permission.Value == tracker.Name
+            "* " + permission.Key + "\n "
+        end
+    end }} | {{ end }}
