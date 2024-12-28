@@ -1,0 +1,97 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# Rider ignored files
+/contentModel.xml
+/modules.xml# Временные файлы IDE Rider/JetBrains
+            .idea/
+            *.suo
+            *.user
+            *.userosscache
+            *.sln.docstates
+            
+            # Конфигурационные файлы для IDE
+            .idea/
+            *.iml
+            .idea/modules.xml
+            .idea/*.iws
+            .idea/*.idea
+            .idea/workspace.xml
+            .idea/tasks.xml
+            .idea/gradle.xml
+            .idea/libraries
+            .idea/inspectionProfiles/Project_Default.xml
+            
+            # Build-папки
+            bin/
+            obj/
+            out/
+            
+            # Логи
+            *.log
+            
+            # Кеши и временные файлы
+            *.vs/
+            .vscode/
+            .DS_Store
+            Thumbs.db
+            
+            # Пакеты NuGet
+            *.nupkg
+            *.snupkg
+            project.lock.json
+            project.fragment.lock.json
+            artifacts/
+            packages/
+            *.dll
+            *.pdb
+            
+            # Файлы сборки
+            *.exe
+            *.app
+            *.ipa
+            *.icns
+            *.so
+            *.dylib
+            
+            # Конфигурация, специфичная для платформы
+            *.db
+            *.swp
+            *.swo
+            *.bak
+            *.pid
+            *.seed
+            *.csv
+            
+            # Docker файлы и образы
+            docker-compose.override.yml
+            
+            # User-секреты
+            secrets.json
+            
+            # Temporary Test Files
+            TestResults/
+            *.cache/
+            *.tmp
+            *.temp
+            *.pidb
+            
+            # Resharper
+            _ReSharper*/
+            *.DotSettings.user
+            resharper.xml
+            
+            # Rider
+            .idea/
+            .idea_modules/
+            .idea_tasks/
+            
+            # Комментарий: можно добавить специфичные для вашего проекта правила
+
+/.idea.RedmineDocs.iml
+/projectSettingsUpdater.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
