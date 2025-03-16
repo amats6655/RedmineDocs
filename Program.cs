@@ -15,6 +15,7 @@ namespace RedmineDocs
         static async Task Main(string[] args)
         {
             // Настройка Serilog
+            var envVars = new EnvLoader().Load();
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console(
@@ -34,7 +35,11 @@ namespace RedmineDocs
 
             try
             {
-                Log.Information("Начало генерации документации.");
+                var connectionString = "";
+                if (!string.IsNullOrEmpty(envVars[AppSettings.ConnectionString]))
+                    connectionString = envVars[AppSettings.ConnectionString];
+                else
+                    connectionString = configuration.GetConnectionString("DefaultConnection");
 
                 // Настройка конфигурации
                 var builder = new ConfigurationBuilder()
