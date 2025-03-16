@@ -1,7 +1,10 @@
+using Newtonsoft.Json;
+
 namespace RedmineDocs.Models;
 
-public class Tracker : BaseModel
+public class Tracker
 {
-	public List<Button> Buttons { get; set; } = new();
-	public List<Role> Roles { get; set; } = new();
+	[JsonProperty ("trackerId")] public int Id { get; set; }
+	[JsonProperty ("trackerName")] public required string Name { get; set; }
+	[JsonProperty ("trackerDescription")] public string? Description { get; set; }
 }

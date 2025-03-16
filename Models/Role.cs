@@ -1,97 +1,53 @@
+using Newtonsoft.Json;
+using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace RedmineDocs.Models;
-public class Role : BaseModel
+public class Role
 {
-    public string Settings { get; set; } // Сырые данные из поля settings
+    [JsonProperty ("id")] public int Id { get; set; }
+    [JsonProperty ("name")] public required string Name { get; set; }
+    public string? Permissions { get; set; }
+    public string? Settings { get; set; }
+    
+    [JsonIgnore] public List<string>? ParsedPermissions { get; set; }
+    [JsonIgnore] public RoleSettings? ParsedSettings { get; set; }
 
-    // Парсенные права доступа
-    public List<string> Permissions { get; set; } = new();
-    public Dictionary<string, string> PermissionsAllTrackers { get; set; } = new();
-    public Dictionary<string, List<string>> PermissionsTrackerIds { get; set; } = new();
-
-    // Связи
-    public List<Tracker> Trackers { get; set; } = new();
-    public List<Button> Buttons { get; set; } = new();
-
-    // Метод для парсинга settings
-public void ParseSettings(Dictionary<string, string> trackerIdToName)
- {
-    if (string.IsNullOrEmpty(Settings))
-        return;
-
-    var deserializer = new DeserializerBuilder()
-        .WithNamingConvention(CamelCaseNamingConvention.Instance)
-        // Маппируем пользовательский тег на Dictionary<string, object>
-        .WithTagMapping("!ruby/hash:ActiveSupport::HashWithIndifferentAccess", typeof(Dictionary<string, object>))
-        .Build();
-
-    Dictionary<string, object> yamlObject;
-    try
+    public void ParseYamlFields()
     {
-        yamlObject = deserializer.Deserialize<Dictionary<string, object>>(Settings);
-    }
-    catch (YamlDotNet.Core.YamlException ex)
-    {
-        Console.WriteLine($"Ошибка при десериализации settings для роли '{Name}': {ex.Message}");
-        return;
-    }
+        var fixedSettings = Settings;
+        if(!string.IsNullOrEmpty(Settings) && Settings.Contains("!ruby/hash:ActiveSupport::HashWithIndifferentAccess"))
+            fixedSettings = Settings.Replace("!ruby/hash:ActiveSupport::HashWithIndifferentAccess", "");
 
-    // Парсинг списка permissions
-    if (yamlObject.ContainsKey("permissions"))
-    {
-        var permissionsList = yamlObject["permissions"] as IEnumerable<object>;
-        if (permissionsList != null)
+        var deserializer = new DeserializerBuilder()
+            .WithNamingConvention(new UnderscoredNamingConvention())
+            .Build();
+
+        if (!string.IsNullOrEmpty(Permissions))
         {
-            Permissions = permissionsList.Select(p => p.ToString()).ToList();
-        }
-    }
-
-    // Парсинг permissions_all_trackers
-    if (yamlObject.ContainsKey("permissions_all_trackers"))
-    {
-        var permissionsAllTrackers = yamlObject["permissions_all_trackers"] as Dictionary<string, object>;
-        if (permissionsAllTrackers != null)
-        {
-            PermissionsAllTrackers = permissionsAllTrackers.ToDictionary(
-                kv => kv.Key.ToString(),
-                kv => kv.Value.ToString()
-            );
-        }
-    }
-
-    // Парсинг permissions_tracker_ids
-    if (yamlObject.ContainsKey("permissions_tracker_ids"))
-    {
-        var permissionsTrackerIds = yamlObject["permissions_tracker_ids"] as Dictionary<string, object>;
-        if (permissionsTrackerIds != null)
-        {
-            PermissionsTrackerIds = new Dictionary<string, List<string>>();
-
-            foreach (var kvp in permissionsTrackerIds)
+            try
             {
-                var permission = kvp.Key.ToString();
-                var trackerIdsList = kvp.Value as IEnumerable<object>;
-                if (trackerIdsList != null)
-                {
-                    var trackerNames = new List<string>();
-                    foreach (var trackerIdObj in trackerIdsList)
-                    {
-                        var trackerIdStr = trackerIdObj.ToString();
-                        if (trackerIdToName.TryGetValue(trackerIdStr, out var trackerName))
-                        {
-                            trackerNames.Add(trackerName);
-                        }
-                        else
-                        {
-                            trackerNames.Add($"ID {trackerIdStr} (название не найдено)");
-                        }
-                    }
-                    PermissionsTrackerIds[permission] = trackerNames;
-                }
+                ParsedPermissions = deserializer.Deserialize<List<string>>(Permissions);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Ошибка при десериализации YAML-поля роли {RoleId}", Id);
+                Log.Debug("Permissions: {Permissions}", Permissions);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(fixedSettings))
+        {
+            try
+            {
+                ParsedSettings = deserializer.Deserialize<RoleSettings>(fixedSettings);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Ошибка при десериализации YAML-поля роли {RoleId}", Id);
+                Log.Debug("Settings: {Settings}", fixedSettings);
             }
         }
     }
-}
 }
