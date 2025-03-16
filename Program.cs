@@ -16,7 +16,20 @@ namespace RedmineDocs
         {
             // Настройка Serilog
             Log.Logger = new LoggerConfiguration()
-                .WriteTo.Console()
+                .MinimumLevel.Debug()
+                .WriteTo.Console(
+                    restrictedToMinimumLevel: LogEventLevel.Information,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                )
+                .WriteTo.File(
+                    path: configuration["logPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "logs/log-.log"),
+                    rollingInterval: RollingInterval.Day,
+                    restrictedToMinimumLevel: LogEventLevel.Debug,
+                    fileSizeLimitBytes: 100_000_000,
+                    rollOnFileSizeLimit: true,
+                    retainedFileCountLimit: 12,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                )
                 .CreateLogger();
 
             try
