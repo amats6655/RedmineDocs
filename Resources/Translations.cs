@@ -1,6 +1,3 @@
-using Newtonsoft.Json;
-using Serilog;
-
 namespace RedmineDocs.Resources;
 
 public static class Translations
