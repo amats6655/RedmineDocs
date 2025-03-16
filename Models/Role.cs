@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-using Serilog;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 

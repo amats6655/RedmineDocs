@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-
 namespace RedmineDocs.Models;
 public class Group
 {

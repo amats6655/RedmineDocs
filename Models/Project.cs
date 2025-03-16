@@ -1,12 +1,10 @@
-using Newtonsoft.Json;
-using Serilog;
-
 namespace RedmineDocs.Models;
 
 public class Project
 {
 	[JsonProperty ("project_id")] public int Id { get; set; }
 	[JsonProperty("name")] public string Name { get; set; }
+	[JsonProperty("parent_id")] public int? ParentId { get; set; }
 	[JsonProperty("description")] public string Description { get; set; }
 	[JsonProperty("trackers_json")] public string TrackersJson { get; set; }
 	[JsonProperty("groups_json")] public string GroupsJson { get; set; }
