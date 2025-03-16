@@ -21,6 +21,8 @@ public static class Translations
 
         if (_translations.TryGetValue(term, out var translation))
         {
+            if (translation.Equals(term))
+                Log.Debug("Для термина `{term}` не найден перевод", term);
             return translation;
         }
         return term;
