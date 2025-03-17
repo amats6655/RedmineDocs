@@ -1,21 +1,28 @@
-﻿using Microsoft.Extensions.Configuration;
-using RedmineDocs.Services;
-using RedmineDocs.Models;
-using System.Threading.Tasks;
-using System.IO;
-using MySqlConnector;
-using System.Data;
-using System.Collections.Generic;
-using Serilog;
+﻿using System.Data;
+using DotEnv.Core;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MySql.Data.MySqlClient;
+using RedmineDocs.Services.Implementation;
+using Serilog.Events;
 
-namespace RedmineDocs
+namespace RedmineDocs;
+
+internal class Program
 {
-    class Program
+    static async Task Main(string[] args)
     {
-        static async Task Main(string[] args)
+        try
         {
-            // Настройка Serilog
             var envVars = new EnvLoader().Load();
+            
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var services = new ServiceCollection();
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.Console(
@@ -32,8 +39,10 @@ namespace RedmineDocs
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
                 )
                 .CreateLogger();
-
-            try
+            
+            string outputPath = configuration["OutputPath"] ?? Path.Combine(Directory.GetCurrentDirectory(), "docs");
+            
+            services.AddScoped<IDbConnection>(_ =>
             {
                 var connectionString = "";
                 if (!string.IsNullOrEmpty(envVars[AppSettings.ConnectionString]))
@@ -41,75 +50,61 @@ namespace RedmineDocs
                 else
                     connectionString = configuration.GetConnectionString("DefaultConnection");
 
-                // Настройка конфигурации
-                var builder = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json");
+                return new MySqlConnection(connectionString);
+            });
+            
+            services.AddScoped<IDataService, DataService>();
+            services.AddScoped<IGroupService, GroupService>();
+            services.AddScoped<IProjectService, ProjectService>();
+            services.AddScoped<IButtonService, ButtonService>();
+            services.AddScoped<ITrackerService, TrackerService>();
+            services.AddScoped<IRoleService, RoleService>();
+            
+            var serviceProvider = services.BuildServiceProvider();
+            var dataService = serviceProvider.GetRequiredService<IDataService>();
+            var projectService = serviceProvider.GetRequiredService<IProjectService>();
+            var buttonService = serviceProvider.GetRequiredService<IButtonService>();
+            var groupService = serviceProvider.GetRequiredService<IGroupService>();
+            var trackerService = serviceProvider.GetRequiredService<ITrackerService>();
+            var roleService = serviceProvider.GetRequiredService<IRoleService>();
 
-                var configuration = builder.Build();
-
-                string connectionString = configuration.GetConnectionString("RedmineDatabase");
-
-                using IDbConnection dbConnection = new MySqlConnection(connectionString);
-                dbConnection.Open();
-                
-                var buttonService = new ButtonService(dbConnection);
-                var allButtons = await buttonService.GetAllButtonsAsync();
-                var roleService = new RoleService(dbConnection, allButtons);
-                var allRoles = await roleService.GetAllRolesAsync();
-                var groupService = new GroupService(dbConnection);
-                var trackerService = new TrackerService(dbConnection, allButtons, allRoles);
-                var projectService = new ProjectService(connectionString, allButtons, allRoles);
-
-                // Получение всех групп и проектов
-                var groups = await groupService.GetGroupsAsync();
-                var projects = await projectService.GetProjectsAsync();
-
-                // Генерация страниц для проектов
-                projectService.PageGenerate(projects);
-
-                // Генерация страниц для групп
-                foreach (var group in groups)
-                {
-                    Log.Information("Генерация страницы для группы: {GroupName}", group.Name);
-                    groupService.GenerateGroupPage(group);
-                }
-
-                // Генерация страниц для ролей
-                foreach (var role in allRoles){
-                    Log.Information("Генерация страницы для роли: {RoleName}", role.Name);
-                    roleService.GenerateRolePage(role);
-                }
-
-                // Генерация страниц для трекеров
-                foreach (var project in projects)
-                {
-                    foreach (var tracker in project.Trackers)
-                    {
-                        Log.Information("Генерация страницы для трекера: {TrackerName}", tracker.Name);
-                        trackerService.GenerateTrackerPage(tracker, project); // Передаём проект
-                    }
-                }
-
-                // Генерация страниц для кнопок
-                foreach (var button in allButtons)
-                {
-                        Log.Information("Генерация страницы для кнопки: {ButtonName}", button.Name);
-                        buttonService.GenerateButtonPage(button);
-                }
-
-                dbConnection.Close();
-
-                Log.Information("Генерация документации завершена успешно.");
-            }
-            catch (Exception ex)
+            if (args.Contains("--debug-groups"))
             {
-                Log.Fatal(ex, "Произошла критическая ошибка во время генерации документации.");
+                var projectData = await dataService.GetProjectsAsync();
+                Log.Information("=== Отладка данных групп ===");
+                foreach (var project in projectData)
+                {
+                    Log.Information("Проект {ProjectId} : {ProjectName}", project.Id, project.Name);
+                    Log.Information("Данные групп: {GroupsJson}", project.GroupsJson);
+                }
+
+                return;
             }
-            finally
+            
+            var projects = await projectService.GetProjectsAsync();
+            var buttons = await buttonService.GetButtonsAsync();
+            var roles = await roleService.GetRolesAsync();
+            var trackers = trackerService.GetTrackersAsync(projects);
+            var groups = groupService.GetGroups(projects);
+            
+            Log.Information("Все сущности успешно загружены");
+
+            var markdownGenerator =
+                new MarkdownGeneratorService(outputPath, projects, roles, trackers, groups, buttons);
+            
+            
+            Log.Information("Генерация документации для трекеров");
+            foreach (var tracker in trackers)
             {
-                Log.CloseAndFlush();
+                Log.Debug("Генерация документации для трекера Id={Id}, Name={Name}", tracker.Id, tracker.Name);
+                await markdownGenerator.GenerateTrackerPage(tracker);
             }
+
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Критическая ошибка при выполнении программы");
+            throw;
         }
     }
 }
