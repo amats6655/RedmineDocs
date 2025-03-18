@@ -25,9 +25,4 @@ public class GroupService : IGroupService
         Log.Information("Обработка групп завершена. Всего групп: {Count}", groups.Count);
         return groups;
     }
-
-    public Dictionary<int, List<Group>> GetProjectGroupsAsync(List<Project> projects)
-    {
-        throw new NotImplementedException();
-    }
 }
