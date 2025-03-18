@@ -2,13 +2,7 @@ namespace RedmineDocs.Services.Interfaces;
 
 public interface IMarkdownGeneratorService
 {
-    Task GenerateProjectPage(
-        Project project,
-        List<Tracker> trackers,
-        Dictionary<int, List<Group>> groups,
-        List<Role> roles,
-        List<Button> buttons);
-
+    Task GenerateProjectPage(Project project);
     Task GenerateTrackerPage(Tracker tracker);
     Task GenerateGroupPage(Group group);
     Task GenerateRolePage(Role role);
