@@ -92,12 +92,39 @@ internal class Program
             var markdownGenerator =
                 new MarkdownGeneratorService(outputPath, projects, roles, trackers, groups, buttons);
             
+            Log.Information("Генерация документов для проектов");
+            foreach (var project in projects)
+            {
+                Log.Debug("Генерация документации для проекта Id={Id}, Name={Name}", project.Id, project.Name);
+                await markdownGenerator.GenerateProjectPage(project);
+            }
+            
+            Log.Information("Генерация документов для групп");
+            foreach (var group in groups)
+            {
+                Log.Debug("Генерация документации для группы Id={Id}, Name={Name}", group.Id, group.Name);
+                await markdownGenerator.GenerateGroupPage(group);
+            }
             
             Log.Information("Генерация документации для трекеров");
             foreach (var tracker in trackers)
             {
                 Log.Debug("Генерация документации для трекера Id={Id}, Name={Name}", tracker.Id, tracker.Name);
                 await markdownGenerator.GenerateTrackerPage(tracker);
+            }
+            
+            Log.Information("Генерация документов для ролей");
+            foreach (var role in roles)
+            {
+                Log.Debug("Генерация документации для роли Id={Id}, Name={Name}", role.Id, role.Name);
+                await markdownGenerator.GenerateRolePage(role);
+            }
+            
+            Log.Information("Генерация документов для кнопок");
+            foreach (var button in buttons)
+            {
+                Log.Debug("Генерация документации для кнопки Id={Id}, Name={Name}", button.Id, button.Name);
+                await markdownGenerator.GenerateButtonPage(button);
             }
 
         }
