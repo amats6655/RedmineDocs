@@ -3,6 +3,7 @@ using DotEnv.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MySql.Data.MySqlClient;
+using RedmineDocs.Resources;
 using RedmineDocs.Services.Implementation;
 using Serilog.Events;
 
@@ -76,6 +77,26 @@ internal class Program
                 {
                     Log.Information("Проект {ProjectId} : {ProjectName}", project.Id, project.Name);
                     Log.Information("Данные групп: {GroupsJson}", project.GroupsJson);
+                }
+
+                return;
+            }
+
+            if (args.Contains("--debug-translations"))
+            {
+                Log.Information(Translations.GetWithSource(":view_issues"));
+                return;
+            }
+
+            if (args.Contains("--debug-roles"))
+            {
+                var roleData = await dataService.GetRolesAsync();
+                Log.Information("=== Отладка данных ролей ===");
+                foreach (var role in roleData)
+                {
+                    Log.Information("Роль {RoleId} : {RoleName}", role.Id, role.Name);
+                    Log.Information("Общие права {Permissions}", role.Permissions);
+                    Log.Information("Права в трекерах {Settings}", role.Settings);
                 }
 
                 return;
