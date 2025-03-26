@@ -46,7 +46,7 @@ public class ProjectMarkdownGenerator : MarkdownGeneratorBase
 
     private void GenerateTrackersSection(StringBuilder sb, Project project)
     {
-        sb.AppendLine("### 👁️ Связанные трекеры");
+        sb.AppendLine("## 👁️ Связанные трекеры");
         sb.AppendLine();
 
         if (project.Trackers.Any())
