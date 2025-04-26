@@ -18,8 +18,13 @@ public class ProjectMarkdownGenerator : MarkdownGeneratorBase
     public async Task GenerateProjectPage(Project project, List<Button> buttons)
     {
         var sb = new StringBuilder();
-        
-        AppendHeader(sb, new List<string>{"Проект"}, project.Name);
+
+        var tags = new List<string>() { "Проект" };
+        if (project.ParentId != null)
+        {
+            tags.Add(Projects.Where(p => p.Id == project.ParentId).FirstOrDefault()?.Name);
+        }
+        AppendHeader(sb, tags, project.Name);
 
         GenerateOverviewSection(sb, project);
         
