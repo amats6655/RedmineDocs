@@ -176,9 +176,10 @@ public class ButtonMarkdownGenerator : MarkdownGeneratorBase
                     var isFirstValue = true;
                     foreach (var value in action.Values)
                     {
+                        string valueTranslation = Translations.Get(value.Value);
                         if (isFirstValue)
                         {
-                            sb.AppendLine($"| **{actionTranslation}** | **{fieldTranslation}** | {value.Value} |");
+                            sb.AppendLine($"| **{actionTranslation}** | **{fieldTranslation}** | {valueTranslation} |");
                             isFirstValue = false;
                         }
                         else
