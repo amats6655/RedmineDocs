@@ -168,6 +168,12 @@ public abstract class MarkdownGeneratorBase
         var fileName = GetSafeFilePath(entityType, name, entityId);
         await File.WriteAllTextAsync(fileName, content.ToString());
     }
+    
+    protected async Task SaveToFile(StringBuilder content, string name)
+    {
+        var fileName = Path.Combine(OutputPath, name + ".md");
+        await File.WriteAllTextAsync(fileName, content.ToString());
+    }
 
     /// <summary>
     /// Добавляем заголовок markdown страницы

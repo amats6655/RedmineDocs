@@ -7,6 +7,7 @@ public class MarkdownGeneratorService : IMarkdownGeneratorService
     private readonly TrackerMarkdownGenerator _trackerGenerator;
     private readonly RoleMarkdownGenerator _roleGenerator;
     private readonly ButtonMarkdownGenerator _buttonGenerator;
+    private readonly IndexMarkdownGenerator _indexGenerator;
     private readonly List<Project> _projects;
     private readonly List<Role> _roles;
     private readonly List<Tracker> _trackers;
@@ -33,6 +34,7 @@ public class MarkdownGeneratorService : IMarkdownGeneratorService
         _trackerGenerator = new TrackerMarkdownGenerator(outputPath, projects, trackers, roles, groups, buttons);
         _roleGenerator = new RoleMarkdownGenerator(outputPath, projects, trackers, roles, groups, buttons);
         _buttonGenerator = new ButtonMarkdownGenerator(outputPath, projects, trackers, roles, groups, buttons);
+        _indexGenerator = new IndexMarkdownGenerator(outputPath, projects, trackers, roles, groups, buttons);
     }
     
     public async Task GenerateProjectPage(Project project)
@@ -60,8 +62,8 @@ public class MarkdownGeneratorService : IMarkdownGeneratorService
         await _buttonGenerator.GenerateButtonPage(button);
     }
 
-    public Task GenerateIndexPage()
+    public async Task GenerateIndexPage()
     {
-        throw new NotImplementedException();
+        await _indexGenerator.GenerateIndexPage();
     }
 }

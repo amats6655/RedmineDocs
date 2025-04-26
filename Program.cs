@@ -147,6 +147,9 @@ internal class Program
                 Log.Debug("Генерация документации для кнопки Id={Id}, Name={Name}", button.Id, button.Name);
                 await markdownGenerator.GenerateButtonPage(button);
             }
+            
+            Log.Information("Генерация домашней страницы");
+            await markdownGenerator.GenerateIndexPage();
 
         }
         catch (Exception ex)
